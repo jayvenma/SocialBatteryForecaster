@@ -1,26 +1,24 @@
 import type { EventsResponse, MeResponse, Profile } from "./types";
 
 // In dev, use Vite proxy (same-origin, no CORS pain)
-// In prod, use env base URL (MUST include https://)
-const RAW_BASE = import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE_URL as string);
+// In prod, MUST use VITE_API_BASE_URL (full backend origin)
+const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL as string | undefined;
 
-function normalizeBase(base: string) {
-  if (!base) return "";
-  const b = base.trim().replace(/\/+$/, "");
-  // Guard against "socialbatteryforecaster.onrender.com" (missing scheme)
-  if (b && !/^https?:\/\//i.test(b)) {
-    throw new Error(
-      `VITE_API_BASE_URL must include https:// (got: "${base}"). Example: https://your-backend.onrender.com`
-    );
-  }
-  return b;
-}
-
-const API_BASE = normalizeBase(RAW_BASE);
+const API_BASE =
+  import.meta.env.DEV
+    ? ""
+    : (() => {
+        if (!RAW_API_BASE) {
+          throw new Error(
+            "Missing VITE_API_BASE_URL in production. Set it in Vercel env vars to your Render backend origin, e.g. https://your-backend.onrender.com"
+          );
+        }
+        return RAW_API_BASE.replace(/\/+$/, "");
+      })();
 
 function joinUrl(base: string, path: string) {
-  if (!base) return path;
-  return base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+  if (!base) return path; // dev proxy
+  return base + "/" + path.replace(/^\/+/, "");
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -28,8 +26,8 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     credentials: "include",
     ...init,
     headers: {
-      ...(init?.headers || {}),
       "Content-Type": "application/json",
+      ...(init?.headers || {}),
     },
   });
 
