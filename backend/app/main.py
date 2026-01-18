@@ -44,6 +44,10 @@ except Exception:
 # ------------------
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
+# ✅ ADDED: prevent oauthlib from raising when Google returns a reduced scope set
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
+os.environ["OAUTHLIB_IGNORE_SCOPE_CHANGE"] = "1"
+
 BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
 DB_PATH = BASE_DIR / "social_energy.db"
 
@@ -552,9 +556,8 @@ def auth_callback(request: Request):
     flow = _flow(state=state)
     authorization_response = str(request.url)
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message=r"Scope has changed.*")
-        flow.fetch_token(authorization_response=authorization_response)
+    # ✅ CHANGED: warnings.catch_warnings doesn't help here; oauthlib raises Warning as an exception.
+    flow.fetch_token(authorization_response=authorization_response)
 
     credentials = flow.credentials
 
