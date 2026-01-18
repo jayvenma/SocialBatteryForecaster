@@ -1,9 +1,22 @@
 import type { EventsResponse, MeResponse, Profile } from "./types";
 
 // In dev, use Vite proxy (same-origin, no CORS pain)
-// In prod, use env base URL
-const API_BASE =
-  import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE_URL as string);
+// In prod, use env base URL (MUST include https://)
+const RAW_BASE = import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE_URL as string);
+
+function normalizeBase(base: string) {
+  if (!base) return "";
+  const b = base.trim().replace(/\/+$/, "");
+  // Guard against "socialbatteryforecaster.onrender.com" (missing scheme)
+  if (b && !/^https?:\/\//i.test(b)) {
+    throw new Error(
+      `VITE_API_BASE_URL must include https:// (got: "${base}"). Example: https://your-backend.onrender.com`
+    );
+  }
+  return b;
+}
+
+const API_BASE = normalizeBase(RAW_BASE);
 
 function joinUrl(base: string, path: string) {
   if (!base) return path;
@@ -15,8 +28,8 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     credentials: "include",
     ...init,
     headers: {
-      "Content-Type": "application/json",
       ...(init?.headers || {}),
+      "Content-Type": "application/json",
     },
   });
 
@@ -59,34 +72,19 @@ export async function submitOnboarding(answers: number[]): Promise<Profile> {
   });
 }
 
-/**
- * DB-backed events (your main "refresh" list)
- * Backend should implement: GET /api/events?hours=24
- */
 export async function getEvents(hours = 24): Promise<EventsResponse> {
   return apiFetch<EventsResponse>(`/api/events?hours=${hours}`);
 }
 
-/**
- * Sync from Google Calendar INTO the DB (does not return events; call getEvents after)
- * Backend should implement: POST /api/google/sync?hours=24
- */
 export async function syncGoogle(
   hours = 24
 ): Promise<{ synced: number; window_hours: number }> {
   return apiFetch<{ synced: number; window_hours: number }>(
     `/api/google/sync?hours=${hours}`,
-    {
-      method: "POST",
-    }
+    { method: "POST" }
   );
 }
 
-/**
- * Create a manual/local event that persists in the DB
- * Backend should implement: POST /api/events
- * Expects to return: { event: ScoredEvent }
- */
 export async function createEvent(data: {
   title: string;
   start: string;
@@ -102,12 +100,6 @@ export async function createEvent(data: {
   });
 }
 
-/**
- * Update an event in the DB
- * Backend should implement: PUT /api/events/{id}
- *
- * NOTE: This is for LOCAL events. Google events should use updateGoogleOverride.
- */
 export async function updateEvent(
   id: string,
   data: {
@@ -126,18 +118,6 @@ export async function updateEvent(
   });
 }
 
-/**
- * Part B: Update Google event overrides (local-only)
- * Backend implements: PUT /api/events/google_overrides/{id}
- *
- * You can use this to allow editing:
- * - attendee_count
- * - event_type
- * - has_video (optional)
- * - has_conference_link (optional)
- *
- * This does NOT write back to Google Calendar.
- */
 export async function updateGoogleOverride(
   id: string,
   data: {
@@ -153,10 +133,6 @@ export async function updateGoogleOverride(
   });
 }
 
-/**
- * Delete an event from the DB
- * Backend should implement: DELETE /api/events/{id}
- */
 export async function deleteEvent(id: string) {
   return apiFetch(`/api/events/${id}`, { method: "DELETE" });
 }
