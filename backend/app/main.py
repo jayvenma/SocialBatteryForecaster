@@ -175,21 +175,26 @@ app.add_middleware(
     secret_key=SESSION_SECRET,
     same_site="none",
     https_only=True,
-    max_age=60 * 60 * 24 * 7,  # 7 days
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://socialbatteryforecaster.xyz",
-    "https://social-battery-forecaster.vercel.app",
+        "https://socialbatteryforecaster.xyz",
+        "https://www.socialbatteryforecaster.xyz",
+        "http://localhost:5173",
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    )
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+    ],
+)
+
 
 
 # ------------------
