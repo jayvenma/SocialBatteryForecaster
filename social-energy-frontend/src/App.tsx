@@ -388,7 +388,7 @@ export default function App() {
               <div className="text-sm opacity-80 mt-1">We only use calendar data to compute your energy forecast.</div>
             </div>
 
-            <a className="btn-comic sticker" href="/auth/login">
+            <a className="btn-comic sticker" href={`${import.meta.env.VITE_API_BASE_URL}/auth/login`}>
               Connect Google
             </a>
           </div>
