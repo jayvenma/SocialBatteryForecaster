@@ -1,0 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Comic theme */
+:root{
+  --ink: #e5e7eb;          /* light ink */
+  --paper: #0b1020;        /* deep navy */
+  --panel: #111a33;        /* card background */
+  --stroke: #0a0f1f;       /* outline */
+  --pop: #fb7185;          /* pink */
+  --zap: #fbbf24;          /* warm yellow */
+  --aqua:#34d399;          /* mint */
+  --sky: #60a5fa;          /* blue */
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body{
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 10%, rgba(251,191,36,0.10), transparent 35%),
+              radial-gradient(circle at 80% 0%, rgba(251,113,133,0.12), transparent 40%),
+              radial-gradient(circle at 30% 90%, rgba(96,165,250,0.10), transparent 45%),
+              var(--paper);
+}
+
+/* Halftone-ish background */
+.comic-bg{
+  background:
+    radial-gradient(circle at 10px 10px, rgba(229,231,235,0.06) 2px, transparent 2.5px) 0 0 / 18px 18px,
+    radial-gradient(circle at 10px 10px, rgba(229,231,235,0.03) 1px, transparent 1.5px) 0 0 / 9px 9px;
+}
+
+.sticker{
+  background: var(--panel);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.45);
+}
+
+.btn-comic {
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 rgba(17,24,39,0.25);
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+/* Schedule blocks should NOT cast big sticker shadows (they look like overlap) */
+.schedule-sticker {
+  background: var(--panel);
+  border: 3px solid var(--ink);
+  box-shadow: none;
+}
+
+/* === Schedule event block normalization === */
+.schedule-sticker {
+  box-shadow: none !important;
+  padding: 4px 6px !important;
+  line-height: 1.1;
+  box-sizing: border-box;
+}
+
+.schedule-sticker * {
+  box-sizing: border-box;
+}
