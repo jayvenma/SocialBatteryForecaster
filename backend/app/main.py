@@ -172,8 +172,8 @@ init_db()
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
-    same_site="lax",
-    https_only=False,
+    same_site="none",   # ✅ allow cross-site cookie
+    https_only=True,    # ✅ cookie marked Secure (required for SameSite=None)
 )
 
 app.add_middleware(
