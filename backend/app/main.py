@@ -169,11 +169,16 @@ def init_db():
 app = FastAPI(title="Social Battery Forecaster")
 init_db()
 
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
-    same_site="none",   # ✅ allow cross-site cookie
-    https_only=True,    # ✅ cookie marked Secure (required for SameSite=None)
+    same_site="none",
+    https_only=True,
+    max_age=60 * 60 * 24 * 7,  # 7 days
 )
 
 app.add_middleware(
