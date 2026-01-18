@@ -202,6 +202,15 @@ async def debug_exception_handler(request: Request, exc: Exception):
 # ------------------
 # HEALTH
 # ------------------
+
+@app.get("/debug/session")
+def debug_session(request: Request):
+    return {
+        "has_cookie": bool(request.headers.get("cookie")),
+        "session_keys": list(request.session.keys()),
+        "oauth_state": request.session.get("oauth_state"),
+        "user": request.session.get("user"),
+    }
 @app.get("/health")
 def health():
     return {
